@@ -2,13 +2,66 @@ services:
 
   app:
     build: .
+    image: hardening-app:1.0
+    # Publica so no localhost do host, nao em todas as interfaces
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
+    # Os valores vem do .env, nada de senha escrita aqui
+    environment:
+      DB_HOST: banco
+      DB_NAME: ${DB_NAME:?defina DB_NAME no .env}
+      DB_USER: ${DB_USER:?defina DB_USER no .env}
+      DB_PASSWORD: ${DB_PASSWORD:?defina DB_PASSWORD no .env}
+    depends_on:
+      banco:
+        condition: service_healthy
+    networks:
+      - externa
+      - interna
+    # Menor privilegio: sem escrita no disco, sem capabilities, sem escalar privilegio
+    read_only: true
+    tmpfs:
+      - /tmp
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    # Limites de recursos
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 50
 
   banco:
-    image: mysql:latest
+    # Versao LTS fixada, em vez de latest
+    image: mysql:8.4
     environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: sistema
-    ports:
-      - "3306:3306"
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?defina DB_ROOT_PASSWORD no .env}
+      MYSQL_DATABASE: ${DB_NAME}
+      # Usuario comum para a aplicacao, que nao usa o root do banco
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    # Sem "ports": o banco so e acessivel pela rede interna
+    volumes:
+      - dados_banco:/var/lib/mysql
+    networks:
+      - interna
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 1g
+    cpus: 1.0
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+networks:
+  # Rede por onde a aplicacao recebe acesso de fora
+  externa:
+  # Rede isolada, sem saida para fora, so para app e banco conversarem
+  interna:
+    internal: true
+
+volumes:
+  dados_banco:

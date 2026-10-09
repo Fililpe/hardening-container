@@ -1,0 +1,63 @@
+== 1. Usuario que executa a aplicacao
+ Container hardening-container-banco-1 Running 
+ Container hardening-container-banco-1 Waiting 
+ Container hardening-container-banco-1 Healthy 
+ Container hardening-container-app-run-77a1430bf5de Creating 
+ Container hardening-container-app-run-77a1430bf5de Created 
+uid=1000(node) gid=1000(node) groups=1000(node),1000(node)
+
+== 2. Sistema de arquivos somente leitura
+ Container hardening-container-banco-1 Running 
+ Container hardening-container-banco-1 Waiting 
+ Container hardening-container-banco-1 Healthy 
+ Container hardening-container-app-run-4e4bfaf9f0ea Creating 
+ Container hardening-container-app-run-4e4bfaf9f0ea Created 
+touch: /app/teste: Read-only file system
+
+== 3. Variaveis recebidas do .env (sem mostrar a senha)
+ Container hardening-container-banco-1 Running 
+ Container hardening-container-banco-1 Waiting 
+ Container hardening-container-banco-1 Healthy 
+ Container hardening-container-app-run-2540db549192 Creating 
+ Container hardening-container-app-run-2540db549192 Created 
+DB_HOST=banco DB_USER=app_user DB_NAME=sistema DB_PASSWORD=(32 caracteres)
+
+== 4. App alcanca o banco pela rede interna
+ Container hardening-container-banco-1 Running 
+ Container hardening-container-banco-1 Waiting 
+ Container hardening-container-banco-1 Healthy 
+ Container hardening-container-app-run-827839094130 Creating 
+ Container hardening-container-app-run-827839094130 Created 
+conectou em banco:3306
+
+== 5. Banco sem porta publicada no host
+NAME                          IMAGE       COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+hardening-container-banco-1   mysql:8.4   "docker-entrypoint.s…"   banco     8 minutes ago   Up 8 minutes (healthy)   3306/tcp, 33060/tcp
+porta 3306 fechada no host
+
+== 6. Banco sem saida para a internet (rede interna)
+sem saida para a internet
+
+== 7. Limites e restricoes aplicados
+app:   memoria=134217728 nanocpus=500000000 pids=50 read_only=true cap_drop=[ALL] security_opt=[no-new-privileges:true]
+banco: memoria=1073741824 nanocpus=1000000000 security_opt=[no-new-privileges:true]
+
+== 8. Imagem: tamanho, conteudo e nenhuma senha nas camadas
+hardening-app:1.0  236MB
+total 8
+drwxr-xr-x    1 root     root            42 Oct  9 20:59 .
+drwxr-xr-x    1 root     root             0 Oct  9 21:08 ..
+-rw-r--r--    1 node     node           154 Oct  9 20:59 package.json
+-rw-r--r--    1 node     node            27 Oct  9 20:46 server.js
+ocorrencias de PASSWORD no historico da imagem: 0
+
+== 9. .env fora do Git
+.gitignore:1:.env	.env
+ M Dockerfile
+ M app/package.json
+ M docker-compose.yml
+?? .dockerignore
+?? .env.example
+?? .gitignore
+?? evidencias/
+?? validar.sh

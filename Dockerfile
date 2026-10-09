@@ -1,16 +1,20 @@
-FROM ubuntu:latest
+# Imagem oficial do Node: versao LTS fixada e base Alpine (pequena)
+FROM node:22-alpine
+
+# Modo producao
+ENV NODE_ENV=production
 
 WORKDIR /app
 
-COPY . .
+# Copia so o codigo da aplicacao, ja com o dono certo
+COPY --chown=node:node app/ ./
 
-RUN apt-get update
-RUN apt-get install -y nodejs npm
+# A aplicacao nao tem dependencias, entao nao precisa de npm install.
+# Se passar a ter: RUN npm ci --omit=dev
 
-RUN npm install
-
-ENV DB_PASSWORD=123456
+# Usuario sem privilegios que ja vem na imagem oficial
+USER node
 
 EXPOSE 3000
 
-CMD ["node", "app/server.js"]
+CMD ["node", "server.js"]

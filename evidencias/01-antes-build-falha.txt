@@ -1,0 +1,25 @@
+1.216 npm ERR! enoent ENOENT: no such file or directory, open '/app/package.json'
+1.216 npm ERR! enoent This is related to npm not being able to find a file.
+1.216 npm ERR! enoent 
+1.219 
+1.219 npm ERR! A complete log of this run can be found in:
+1.219 npm ERR!     /root/.npm/_logs/2026-10-09T20_59_06_234Z-debug-0.log
+------
+Dockerfile:10
+
+--------------------
+
+   8 |     RUN apt-get install -y nodejs npm
+
+   9 |     
+
+  10 | >>> RUN npm install
+
+  11 |     
+
+  12 |     ENV DB_PASSWORD=123456
+
+--------------------
+
+failed to solve: process "/bin/sh -c npm install" did not complete successfully: exit code: 254
+
